@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Grid,
   Box,
@@ -9,38 +9,28 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import { useParams } from "react-router-dom";
 import ProductCard from "../../components/ProductCard";
+import productsData from "../../data/productsData";
 
 const Products = () => {
   const { category } = useParams();
-  const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch("http://localhost:3000/products");
-        const data = await res.json();
+  const products = useMemo(() => {
+    let finalProducts = [...productsData];
 
-        let finalProducts = data || [];
+    if (category) {
+      const formattedCategory = decodeURIComponent(category)
+        .replace(/-/g, " ")
+        .toLowerCase();
 
-        if (category) {
-          const formattedCategory = decodeURIComponent(category)
-            .replace(/-/g, " ")
-            .toLowerCase();
+      finalProducts = finalProducts.filter(
+        (item) => item.category.toLowerCase() === formattedCategory
+      );
+    }
 
-          finalProducts = finalProducts.filter(
-            (item) => item.category.toLowerCase() === formattedCategory
-          );
-        }
-
-        setProducts(finalProducts);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchProducts();
+    return finalProducts;
   }, [category]);
+
 
 
   const filteredProducts = products.filter((item) =>
